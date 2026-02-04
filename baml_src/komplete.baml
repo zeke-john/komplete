@@ -21,6 +21,7 @@ function GeneratePlan(user_request: string, os: string, shell: string, cwd: stri
     - Be direct and minimal. No extra steps.
     - If something could be destructive, mention it in the summary but still give the commands.
     - Use the context provided (OS, shell, current directory) to give appropriate commands.
+    - IMPORTANT: The user will run each command you provide. Do NOT give multiple variations or alternatives of the same command. Pick the single best and most commonly used command for each distinct task. For example, if they want a git diff, give ONE git diff command, not three variations.
 
     Context:
     - OS: {{ os }}

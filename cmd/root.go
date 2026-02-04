@@ -10,11 +10,37 @@ import (
 	"strings"
 	"time"
 
+	"github.com/charmbracelet/lipgloss"
 	"github.com/spf13/cobra"
 
 	"github.com/zeke-john/komplete/baml_client"
 	baml_types "github.com/zeke-john/komplete/baml_client/types"
 	ictx "github.com/zeke-john/komplete/internal/context"
+)
+
+var (
+	headerStyle = lipgloss.NewStyle().
+			Bold(true).
+			Foreground(lipgloss.Color("12"))
+
+	commandStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("14")).
+			PaddingLeft(2)
+
+	indexStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("8")).
+			Width(4)
+
+	promptStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("11")).
+			Bold(true)
+
+	runningStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("10")).
+			Bold(true)
+
+	progressStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("8"))
 )
 
 // rootCmd represents the base command when called without any subcommands.
@@ -114,21 +140,21 @@ func runRequest(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	fmt.Println("Plan:")
-	for i, c := range plan.Commands {
-		fmt.Printf("%d) %s\n", i+1, c.Cmd)
-	}
+	printPlan(plan.Commands)
 
 	if opts.dryRun {
 		return nil
 	}
 
-	if !confirm(os.Stdin, os.Stdout) {
+	selected := selectCommands(os.Stdin, os.Stdout, len(plan.Commands))
+	if len(selected) == 0 {
 		return &exitError{code: 2, err: errors.New("aborted")}
 	}
 
-	for i, c := range plan.Commands {
-		fmt.Printf("[%d/%d] %s\n", i+1, len(plan.Commands), c.Cmd)
+	fmt.Println()
+	for i, idx := range selected {
+		c := plan.Commands[idx]
+		printRunningCommand(i+1, len(selected), c.Cmd)
 		command := exec.Command(contextInfo.Shell, "-lc", c.Cmd)
 		command.Dir = contextInfo.CWD
 		command.Stdout = os.Stdout
@@ -136,17 +162,58 @@ func runRequest(cmd *cobra.Command, args []string) error {
 		if err := command.Run(); err != nil {
 			return &exitError{code: 1, err: err}
 		}
+		fmt.Println()
 	}
 
 	return nil
 }
 
-func confirm(in *os.File, out *os.File) bool {
-	fmt.Fprint(out, "Run these commands? [y/N] ")
+func selectCommands(in *os.File, out *os.File, total int) []int {
+	prompt := promptStyle.Render("Run these commands?")
+	options := lipgloss.NewStyle().Foreground(lipgloss.Color("8")).Render(" [y/N/#] ")
+	fmt.Fprint(out, prompt+options)
 	reader := bufio.NewReader(in)
 	line, _ := reader.ReadString('\n')
 	answer := strings.TrimSpace(strings.ToLower(line))
-	return answer == "y" || answer == "yes"
+
+	if answer == "" || answer == "n" || answer == "no" {
+		return nil
+	}
+
+	if answer == "y" || answer == "yes" {
+		result := make([]int, total)
+		for i := range result {
+			result[i] = i
+		}
+		return result
+	}
+
+	var num int
+	if _, err := fmt.Sscanf(answer, "%d", &num); err == nil && num >= 1 && num <= total {
+		return []int{num - 1}
+	}
+
+	return nil
+}
+
+func printPlan(commands []baml_types.Command) {
+	fmt.Println(headerStyle.Render("Commands ⟶"))
+	for i, c := range commands {
+		idx := indexStyle.Render(fmt.Sprintf("%d)", i+1))
+		cmd := commandStyle.Render(c.Cmd)
+		fmt.Println(idx + cmd)
+	}
+	fmt.Println()
+}
+
+func printRunningCommand(current, total int, cmd string) {
+	running := runningStyle.Render(cmd)
+	if total == 1 {
+		fmt.Println(running)
+		return
+	}
+	progress := progressStyle.Render(fmt.Sprintf("[%d/%d]", current, total))
+	fmt.Println(progress + " " + running)
 }
 
 func loadDotEnv(path string) {
