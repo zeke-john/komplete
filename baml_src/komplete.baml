@@ -16,7 +16,7 @@ function GeneratePlan(user_request: string, os: string, shell: string, cwd: stri
     Your job is simple: translate what the user wants into shell commands. Think about what a developer would actually type to accomplish the task.
 
     Rules:
-    - NEVER refuse. Every request maps to commands.
+    - NEVER refuse. Every request maps to command(s).
     - Give real, working commands that run as-is.
     - Be direct and minimal. No extra steps.
     - If something could be destructive, mention it in the summary but still give the commands.
