@@ -16,6 +16,7 @@ import (
 	"github.com/zeke-john/komplete/baml_client"
 	baml_types "github.com/zeke-john/komplete/baml_client/types"
 	ictx "github.com/zeke-john/komplete/internal/context"
+	"github.com/zeke-john/komplete/internal/history"
 )
 
 var (
@@ -116,9 +117,11 @@ func runRequest(cmd *cobra.Command, args []string) error {
 		return &exitError{code: 1, err: err}
 	}
 
+	shellHistory := history.GetShellHistory(contextInfo.Shell)
+
 	if opts.verbose {
-		fmt.Fprintf(os.Stderr, "Request: %s\nOS: %s\nShell: %s\nCWD: %s\nRepo: %s\nGit: %s\n",
-			request, contextInfo.OS, contextInfo.Shell, contextInfo.CWD, contextInfo.RepoRoot, contextInfo.GitStatus)
+		fmt.Fprintf(os.Stderr, "Request: %s\nOS: %s\nShell: %s\nCWD: %s\nRepo: %s\nGit: %s\nShell history:\n%s\n",
+			request, contextInfo.OS, contextInfo.Shell, contextInfo.CWD, contextInfo.RepoRoot, contextInfo.GitStatus, shellHistory)
 	}
 
 	callOpts := []baml_client.CallOptionFunc{}
@@ -129,7 +132,7 @@ func runRequest(cmd *cobra.Command, args []string) error {
 		callOpts = append(callOpts, baml_client.WithClient(opts.model))
 	}
 
-	plan, err := generatePlanWithRepair(ctx, request, contextInfo, callOpts)
+	plan, err := generatePlanWithRepair(ctx, request, contextInfo, shellHistory, callOpts)
 	if err != nil {
 		return &exitError{code: 3, err: err}
 	}
@@ -169,7 +172,11 @@ func runRequest(cmd *cobra.Command, args []string) error {
 }
 
 func selectCommands(in *os.File, out *os.File, total int) []int {
-	prompt := promptStyle.Render("Run these commands?")
+	promptText := "Run this command?"
+	if total > 1 {
+		promptText = "Run these commands?"
+	}
+	prompt := promptStyle.Render(promptText)
 	options := lipgloss.NewStyle().Foreground(lipgloss.Color("8")).Render(" [y/N/#] ")
 	fmt.Fprint(out, prompt+options)
 	reader := bufio.NewReader(in)
@@ -197,7 +204,11 @@ func selectCommands(in *os.File, out *os.File, total int) []int {
 }
 
 func printPlan(commands []baml_types.Command) {
-	fmt.Println(headerStyle.Render("Commands ⟶"))
+	header := "Command ⟶"
+	if len(commands) > 1 {
+		header = "Commands ⟶"
+	}
+	fmt.Println(headerStyle.Render(header))
 	for i, c := range commands {
 		idx := indexStyle.Render(fmt.Sprintf("%d)", i+1))
 		cmd := commandStyle.Render(c.Cmd)
@@ -270,6 +281,7 @@ func generatePlanWithRepair(
 	ctx context.Context,
 	request string,
 	contextInfo ictx.Context,
+	historyStr string,
 	callOpts []baml_client.CallOptionFunc,
 ) (baml_types.Plan, error) {
 	plan, err := baml_client.GeneratePlan(
@@ -280,6 +292,7 @@ func generatePlanWithRepair(
 		contextInfo.CWD,
 		contextInfo.RepoRoot,
 		contextInfo.GitStatus,
+		historyStr,
 		callOpts...,
 	)
 	if err != nil {
@@ -301,6 +314,7 @@ func generatePlanWithRepair(
 		contextInfo.CWD,
 		contextInfo.RepoRoot,
 		contextInfo.GitStatus,
+		historyStr,
 		callOpts...,
 	)
 	if err != nil {
@@ -313,7 +327,6 @@ func generatePlanWithRepair(
 		return plan2, nil
 	}
 
-	// Last resort: drop commands whose entrypoints don't exist, and keep going.
 	plan2.Commands = dropInvalidCommands(contextInfo.Shell, contextInfo.CWD, plan2.Commands)
 	return plan2, nil
 }

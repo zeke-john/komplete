@@ -21,7 +21,7 @@ import (
 	"github.com/zeke-john/komplete/baml_client/types"
 )
 
-func GeneratePlan(ctx context.Context, user_request string, os string, shell string, cwd string, repo_root string, git_status string, opts ...CallOptionFunc) (types.Plan, error) {
+func GeneratePlan(ctx context.Context, user_request string, os string, shell string, cwd string, repo_root string, git_status string, command_history string, opts ...CallOptionFunc) (types.Plan, error) {
 
 	var callOpts callOption
 	for _, opt := range opts {
@@ -37,7 +37,7 @@ func GeneratePlan(ctx context.Context, user_request string, os string, shell str
 	}
 
 	args := baml.BamlFunctionArguments{
-		Kwargs: map[string]any{"user_request": user_request, "os": os, "shell": shell, "cwd": cwd, "repo_root": repo_root, "git_status": git_status},
+		Kwargs: map[string]any{"user_request": user_request, "os": os, "shell": shell, "cwd": cwd, "repo_root": repo_root, "git_status": git_status, "command_history": command_history},
 		Env:    getEnvVars(callOpts.env),
 	}
 

@@ -8,7 +8,7 @@ class Command {
   rationale string
 }
 
-function GeneratePlan(user_request: string, os: string, shell: string, cwd: string, repo_root: string, git_status: string) -> Plan {
+function GeneratePlan(user_request: string, os: string, shell: string, cwd: string, repo_root: string, git_status: string, command_history: string) -> Plan {
   client "OpenRouter"
   prompt #"
     You are a senior developer who types shell commands for the user. When they describe what they want, you give them the exact commands they would type.
@@ -22,6 +22,7 @@ function GeneratePlan(user_request: string, os: string, shell: string, cwd: stri
     - If something could be destructive, mention it in the summary but still give the commands.
     - Use the context provided (OS, shell, current directory) to give appropriate commands.
     - IMPORTANT: The user will run each command you provide. Do NOT give multiple variations or alternatives of the same command. Pick the single best and most commonly used command for each distinct task. For example, if they want a git diff, give ONE git diff command, not three variations.
+    - Use the shell history to understand what the user has been doing. If they reference something they did before (like "do that again" or "cat that file"), use the history to figure out what they mean.
 
     Context:
     - OS: {{ os }}
@@ -29,6 +30,9 @@ function GeneratePlan(user_request: string, os: string, shell: string, cwd: stri
     - Current directory: {{ cwd }}
     - Git repo root: {{ repo_root }}
     - Git status: {{ git_status }}
+
+    Recent shell history (commands user ran before this):
+    {{ command_history }}
 
     User wants: "{{ user_request }}"
 
@@ -46,5 +50,6 @@ test komplete_plan_example {
     cwd #"/Users/example/project"#
     repo_root #"/Users/example/project"#
     git_status #"clean on main"#
+    command_history #"No previous commands."#
   }
 }
