@@ -13,7 +13,21 @@ import (
 const (
 	groqEndpoint   = "https://api.groq.com/openai/v1/chat/completions"
 	defaultModel   = "openai/gpt-oss-20b-128k"
-	systemPrompt   = "You are a shell autocomplete engine. Given a partial command, return ONLY the full completed command. No explanation, no markdown, no quotes."
+	systemPrompt   = `You are a shell autocomplete engine embedded in a terminal. You will receive the user's current working directory, their shell, recent command history, and their partially typed command.
+
+Your job is to predict and return the SINGLE most likely full command the user is trying to type. Think about:
+- What command they are starting to type (even from just 2-3 characters)
+- Their recent history for patterns and context
+- Their current directory for relevant files/paths
+- Common shell commands, flags, and arguments
+
+Rules:
+- Return ONLY the completed command, nothing else
+- No explanation, no markdown, no backticks, no quotes around the command
+- The completion must start with exactly what the user has typed so far
+- Prefer practical, real commands over generic ones
+- Include flags and arguments when they are clearly implied
+- If unsure, complete just the command name`
 	requestTimeout = 2 * time.Second
 )
 
@@ -70,7 +84,7 @@ func (c *Client) Complete(ctx context.Context, buffer, cwd, shell, historyStr st
 			{Role: "system", Content: systemPrompt},
 			{Role: "user", Content: userPrompt},
 		},
-		MaxTokens:   60,
+		MaxTokens:   120,
 		Temperature: 0,
 		Stream:      false,
 	}
@@ -113,36 +127,39 @@ func (c *Client) Complete(ctx context.Context, buffer, cwd, shell, historyStr st
 
 func buildUserPrompt(buffer, cwd, shell, historyStr string) string {
 	var b strings.Builder
-	b.WriteString("cwd: ")
+	b.WriteString("shell: ")
+	b.WriteString(shell)
+	b.WriteString("\ncwd: ")
 	b.WriteString(cwd)
 	if historyStr != "" && historyStr != "No shell history available." {
-		b.WriteString("\nrecent:\n")
-		lines := strings.Split(historyStr, "\n")
-		if len(lines) > 3 {
-			lines = lines[len(lines)-3:]
-		}
-		for _, l := range lines {
+		b.WriteString("\nrecent history:\n")
+		for _, l := range strings.Split(historyStr, "\n") {
+			b.WriteString("  ")
 			b.WriteString(l)
 			b.WriteByte('\n')
 		}
 	}
-	b.WriteString("> ")
+	b.WriteString("\n> ")
 	b.WriteString(buffer)
 	return b.String()
 }
 
 func cleanSuggestion(suggestion, buffer string) string {
+	suggestion = strings.TrimSpace(suggestion)
 	suggestion = strings.Trim(suggestion, "`\"'")
 	suggestion = strings.TrimPrefix(suggestion, "$ ")
+	suggestion = strings.TrimSpace(suggestion)
+
+	if idx := strings.IndexByte(suggestion, '\n'); idx != -1 {
+		suggestion = suggestion[:idx]
+	}
 
 	if strings.HasPrefix(suggestion, buffer) {
 		return suggestion
 	}
 
-	bufferPrefix := strings.Fields(buffer)
-	suggestionFields := strings.Fields(suggestion)
-	if len(bufferPrefix) > 0 && len(suggestionFields) > 0 && bufferPrefix[0] == suggestionFields[0] {
-		return suggestion
+	if strings.HasPrefix(strings.ToLower(suggestion), strings.ToLower(buffer)) {
+		return buffer + suggestion[len(buffer):]
 	}
 
 	return ""

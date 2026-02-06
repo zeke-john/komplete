@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-const maxCommands = 5
+const maxCommands = 10
 
 func GetShellHistory(shell string) string {
 	historyFile := getHistoryFile(shell)
