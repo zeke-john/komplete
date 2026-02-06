@@ -12,7 +12,7 @@ import (
 
 const (
 	groqEndpoint   = "https://api.groq.com/openai/v1/chat/completions"
-	defaultModel   = "openai/gpt-oss-20b-128k"
+	defaultModel   = "llama-3.1-8b-instant"
 	systemPrompt   = `You are a shell autocomplete engine embedded in a terminal. You will receive the user's current working directory, their shell, recent command history, and their partially typed command.
 
 Your job is to predict and return the SINGLE most likely full command the user is trying to type. Think about:
@@ -37,17 +37,29 @@ type Client struct {
 	httpClient *http.Client
 }
 
-func NewClient(apiKey, model string) *Client {
+type Option func(*Client)
+
+func WithHTTPClient(hc *http.Client) Option {
+	return func(c *Client) {
+		c.httpClient = hc
+	}
+}
+
+func NewClient(apiKey, model string, opts ...Option) *Client {
 	if model == "" {
 		model = defaultModel
 	}
-	return &Client{
+	c := &Client{
 		apiKey: apiKey,
 		model:  model,
 		httpClient: &http.Client{
 			Timeout: requestTimeout,
 		},
 	}
+	for _, o := range opts {
+		o(c)
+	}
+	return c
 }
 
 type chatRequest struct {

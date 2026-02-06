@@ -1,7 +1,6 @@
 package history
 
 import (
-	"bufio"
 	"os"
 	"path/filepath"
 	"strings"
@@ -50,6 +49,8 @@ func fileExists(path string) bool {
 	return err == nil
 }
 
+const tailReadSize = 8192
+
 func readLastCommands(path string, shell string, n int) ([]string, error) {
 	file, err := os.Open(path)
 	if err != nil {
@@ -57,22 +58,40 @@ func readLastCommands(path string, shell string, n int) ([]string, error) {
 	}
 	defer file.Close()
 
-	var lines []string
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		lines = append(lines, scanner.Text())
+	stat, err := file.Stat()
+	if err != nil {
+		return nil, err
 	}
 
-	if len(lines) == 0 {
+	size := stat.Size()
+	if size == 0 {
 		return nil, nil
 	}
 
-	commands := make([]string, 0, n)
+	readSize := int64(tailReadSize)
+	if size < readSize {
+		readSize = size
+	}
+
+	buf := make([]byte, readSize)
+	_, err = file.ReadAt(buf, size-readSize)
+	if err != nil {
+		return nil, err
+	}
+
+	chunk := string(buf)
+	if readSize < size {
+		if idx := strings.IndexByte(chunk, '\n'); idx != -1 {
+			chunk = chunk[idx+1:]
+		}
+	}
+
+	lines := strings.Split(chunk, "\n")
 	shellName := filepath.Base(shell)
+	commands := make([]string, 0, n)
 
 	for i := len(lines) - 1; i >= 0 && len(commands) < n; i-- {
-		line := lines[i]
-		cmd := parseHistoryLine(line, shellName)
+		cmd := parseHistoryLine(lines[i], shellName)
 		if cmd != "" && !isKompleteCommand(cmd) {
 			commands = append([]string{cmd}, commands...)
 		}
