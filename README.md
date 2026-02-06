@@ -4,11 +4,6 @@ Komplete is a CLI assistant that converts natural-language requests into shell c
 
 ---
 
-baml-cli generate
-go build -o k .
-
----
-
 list files in this folder
 show hidden files
 show disk usage for this folder
@@ -22,3 +17,9 @@ find all .go files in this repo
 show environment variables
 show my shell version
 what apps do ihave on my mac and count them
+
+---
+
+baml-cli generate
+go build -o k .
+eval "$(komplete init zsh)"

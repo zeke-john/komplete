@@ -82,7 +82,7 @@ func Save(path string, cfg Config) error {
 }
 
 func AllowedKeys() []string {
-	return []string{"model", "shell", "timeout", "cwd"}
+	return []string{"model", "shell", "timeout", "cwd", "groq_model"}
 }
 
 func IsAllowedKey(key string) bool {
