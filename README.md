@@ -12,7 +12,12 @@ Two features:
 ```bash
 brew tap zeke-john/tap
 brew install komplete
+
+# macOS will block the binary the first time so run ->
 xattr -dr com.apple.quarantine "$(which komplete)"
+
+# Set up the `k` shorthand (add to your `.zshrc`) ->
+eval "$(komplete init alias)"
 ```
 
 ## Setup
@@ -92,7 +97,7 @@ Open a new terminal. Start typing and suggestions appear as grey text.
 - **Tab** - accept the full suggestion
 - **Shift+Tab** or **Option+F** - accept one word at a time
 
-The autocomplete runs a lightweight background daemon that caches suggestions. It uses Groq's fast inference w/ openai/gpt-oss-20b.
+The autocomplete runs a lightweight background daemon that caches suggestions. It uses Groq's fast inference with llama-3.1-8b-instant.
 
 ## Config
 
@@ -120,7 +125,8 @@ komplete config set model google/gemini-3-flash
 ```
 
 ```bash
-# Autocomplete model on Groq (default: openai/gpt-oss-20b)
+# Autocomplete model on Groq (default: llama-3.1-8b-instant)
+# Must be a non-reasoning model (reasoning models return empty completions)
 komplete config set groq_model llama-3.3-70b-versatile
 ```
 
@@ -128,7 +134,6 @@ komplete config set groq_model llama-3.3-70b-versatile
 # Shell and environment
 komplete config set shell /bin/zsh       # override detected shell
 komplete config set cwd /path/to/dir     # override working directory
-komplete config set timeout 15s          # model request timeout
 ```
 
 API keys set via config are picked up automatically. Environment variables (`OPENROUTER_API_KEY`, `GROQ_API_KEY`) take priority if set.
