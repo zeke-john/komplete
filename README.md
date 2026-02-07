@@ -1,6 +1,6 @@
 # Komplete
 
-A lightweight AI shell assistant that converts natural language to shell commands and provides realtime autocomplete as you type. Completely open-source and made with Go & BAML.
+A lightweight AI shell assistant that converts natural language to shell commands and provides realtime autocomplete as you type.
 
 So the two features are ->
 
@@ -9,9 +9,7 @@ So the two features are ->
 
 A example below of **komplete** in action!
 
-
 https://github.com/user-attachments/assets/b1ab9e93-8127-4591-9f09-59580377bf31
-
 
 ## Install
 
