@@ -13,22 +13,19 @@ import (
 const (
 	groqEndpoint   = "https://api.groq.com/openai/v1/chat/completions"
 	defaultModel   = "llama-3.1-8b-instant"
-	systemPrompt   = `You are a shell autocomplete engine embedded in a terminal. You will receive the user's current working directory, their shell, recent command history, and their partially typed command.
+	systemPrompt   = `You are a shell autocomplete engine. Given a partially typed command, predict the full command.
 
-Your job is to predict and return the SINGLE most likely full command the user is trying to type. Think about:
-- What command they are starting to type (even from just 2-3 characters)
-- Their recent history for patterns and context
-- Their current directory for relevant files/paths
-- Common shell commands, flags, and arguments
+ALWAYS complete aggressively. Even from 2 characters, predict the full command with flags and arguments.
+Use the history and cwd to make smart predictions. If they recently ran a command, predict they'll run something related.
 
 Rules:
-- Return ONLY the completed command, nothing else
-- No explanation, no markdown, no backticks, no quotes around the command
-- The completion must start with exactly what the user has typed so far
-- Prefer practical, real commands over generic ones
-- Include flags and arguments when they are clearly implied
-- If unsure, complete just the command name`
-	requestTimeout = 2 * time.Second
+- Return ONLY the completed command
+- No explanation, no markdown, no backticks, no quotes
+- The completion MUST start with exactly what the user has typed so far
+- Always include likely flags and arguments, never return just a bare command name
+- Be specific: prefer "git push origin main" over "git push"
+- If the user typed part of a path or filename, complete it based on context`
+	requestTimeout = 3 * time.Second
 )
 
 type Client struct {

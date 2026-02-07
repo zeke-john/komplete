@@ -166,6 +166,8 @@ _komplete_fetch() {
         return
     fi
 
+    [[ "$BUFFER" == cd\ * || "$BUFFER" == "cd" ]] && return
+
     _komplete_query_daemon
 }
 
