@@ -9,6 +9,12 @@ So the two features are ->
 
 A example below of **komplete** in action!
 
+
+
+https://github.com/user-attachments/assets/43038b23-5027-499a-b9d6-654bf8eab0b4
+
+
+
 ## Install
 
 ```bash
