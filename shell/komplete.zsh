@@ -279,4 +279,6 @@ add-zsh-hook zshexit _komplete_cleanup 2>/dev/null
 
 _komplete_ensure_daemon
 
+alias k=komplete
+
 fi

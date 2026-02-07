@@ -1,0 +1,48 @@
+version: 2
+
+builds:
+  - env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+      - linux
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w -X github.com/zeke-john/komplete/cmd.Version={{.Version}}
+
+archives:
+  - format: tar.gz
+    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+
+brews:
+  - repository:
+      owner: zeke-john
+      name: homebrew-tap
+    homepage: "https://github.com/zeke-john/komplete"
+    description: "AI shell assistant - natural language to commands and inline autocomplete"
+    license: "MIT"
+    install: |
+      bin.install "komplete"
+    caveats: |
+      Set your API key to start using komplete:
+
+        komplete config set openrouter_api_key YOUR_KEY
+
+      Optional alias (add to .zshrc):
+
+        alias k=komplete
+
+      Optional inline autocomplete (add to .zshrc):
+
+        eval "$(komplete init zsh)"
+        komplete config set groq_api_key YOUR_KEY
+
+changelog:
+  use: github
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^chore:"

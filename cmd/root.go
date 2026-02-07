@@ -15,6 +15,7 @@ import (
 
 	"github.com/zeke-john/komplete/baml_client"
 	baml_types "github.com/zeke-john/komplete/baml_client/types"
+	"github.com/zeke-john/komplete/internal/config"
 	ictx "github.com/zeke-john/komplete/internal/context"
 	"github.com/zeke-john/komplete/internal/history"
 )
@@ -86,6 +87,7 @@ func init() {
 	rootCmd.CompletionOptions.DisableDefaultCmd = true
 	rootCmd.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
 		loadDotEnv(".env")
+		config.LoadAPIKeysIntoEnv()
 		return nil
 	}
 

@@ -35,6 +35,8 @@ func runSuggest(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
+	config.LoadAPIKeysIntoEnv()
+
 	apiKey := os.Getenv("GROQ_API_KEY")
 	if apiKey == "" {
 		return nil

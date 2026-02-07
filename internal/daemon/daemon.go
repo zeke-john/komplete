@@ -46,6 +46,8 @@ const (
 )
 
 func NewServer(portFile string) (*Server, error) {
+	config.LoadAPIKeysIntoEnv()
+
 	apiKey := os.Getenv("GROQ_API_KEY")
 	if apiKey == "" {
 		return nil, fmt.Errorf("GROQ_API_KEY not set")

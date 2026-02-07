@@ -15,7 +15,7 @@ var initCmd = &cobra.Command{
 
 var initZshCmd = &cobra.Command{
 	Use:   "zsh",
-	Short: "Output zsh autocomplete plugin script",
+	Short: "Output zsh autocomplete plugin script (includes alias k=komplete)",
 	Long: `Output the zsh autocomplete plugin. Add this to your .zshrc:
 
   eval "$(komplete init zsh)"`,
@@ -24,7 +24,19 @@ var initZshCmd = &cobra.Command{
 	},
 }
 
+var initAliasCmd = &cobra.Command{
+	Use:   "alias",
+	Short: "Output shell alias (alias k=komplete)",
+	Long: `Output a short alias for komplete. Add this to your .zshrc or .bashrc:
+
+  eval "$(komplete init alias)"`,
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println("alias k=komplete")
+	},
+}
+
 func init() {
 	initCmd.AddCommand(initZshCmd)
+	initCmd.AddCommand(initAliasCmd)
 	rootCmd.AddCommand(initCmd)
 }

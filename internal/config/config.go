@@ -82,7 +82,31 @@ func Save(path string, cfg Config) error {
 }
 
 func AllowedKeys() []string {
-	return []string{"model", "shell", "timeout", "cwd", "groq_model"}
+	return []string{"model", "shell", "timeout", "cwd", "groq_model", "groq_api_key", "openrouter_api_key"}
+}
+
+var envKeyMap = map[string]string{
+	"groq_api_key":       "GROQ_API_KEY",
+	"openrouter_api_key": "OPENROUTER_API_KEY",
+}
+
+func LoadAPIKeysIntoEnv() {
+	path, err := ConfigPath()
+	if err != nil {
+		return
+	}
+	cfg, err := Load(path)
+	if err != nil {
+		return
+	}
+	for cfgKey, envVar := range envKeyMap {
+		if os.Getenv(envVar) != "" {
+			continue
+		}
+		if val := cfg[cfgKey]; val != "" {
+			os.Setenv(envVar, val)
+		}
+	}
 }
 
 func IsAllowedKey(key string) bool {
