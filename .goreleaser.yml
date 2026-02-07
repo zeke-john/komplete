@@ -5,7 +5,6 @@ builds:
       - CGO_ENABLED=0
     goos:
       - darwin
-      - linux
     goarch:
       - amd64
       - arm64
@@ -13,18 +12,24 @@ builds:
       - -s -w -X github.com/zeke-john/komplete/cmd.Version={{.Version}}
 
 archives:
-  - format: tar.gz
+  - formats:
+      - tar.gz
     name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
 
-brews:
+homebrew_casks:
   - repository:
       owner: zeke-john
       name: homebrew-tap
     homepage: "https://github.com/zeke-john/komplete"
     description: "AI shell assistant - natural language to commands and inline autocomplete"
-    license: "MIT"
-    install: |
-      bin.install "komplete"
+    binaries:
+      - komplete
+    hooks:
+      post:
+        install: |
+          if OS.mac?
+            system_command ""/usr/bin/xattr"", args: [""-dr"", ""com.apple.quarantine"", ""#{staged_path}/komplete""]
+          end
     caveats: |
       Set your API key to start using komplete:
 
@@ -32,7 +37,7 @@ brews:
 
       Optional alias (add to .zshrc):
 
-        alias k=komplete
+        eval "$(komplete init alias)"
 
       Optional inline autocomplete (add to .zshrc):
 
