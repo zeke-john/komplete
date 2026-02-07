@@ -43,7 +43,7 @@ homebrew_casks:
         komplete config set groq_api_key YOUR_KEY
 
 changelog:
-  use: github
+  use: git
   filters:
     exclude:
       - "^docs:"
