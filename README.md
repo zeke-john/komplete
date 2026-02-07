@@ -9,8 +9,6 @@ So the two features are ->
 
 A example below of **komplete** in action!
 
-https://github.com/user-attachments/assets/b1ab9e93-8127-4591-9f09-59580377bf31
-
 ## Install
 
 ```bash
@@ -92,7 +90,7 @@ komplete config list  # show all configured values
 komplete config path  # print the config file path
 ```
 
-### Available keys
+### Available Commands
 
 ```bash
 # API keys
