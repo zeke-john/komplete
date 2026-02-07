@@ -18,10 +18,14 @@ typeset -g _komplete_port_file="/tmp/komplete-$(id -u).port"
 typeset -gi _komplete_daemon_port=0
 typeset -g _komplete_result_file="/tmp/komplete-result-$$.txt"
 
+_komplete_remove_highlights() {
+    region_highlight=("${(@)region_highlight:#*fg=8}")
+}
+
 _komplete_clear() {
     POSTDISPLAY=""
     _komplete_suggestion=""
-    region_highlight=("${region_highlight[@]:#*komplete*}")
+    _komplete_remove_highlights
 }
 
 _komplete_display() {
@@ -34,10 +38,10 @@ _komplete_display() {
     local remainder="${suggestion#${BUFFER}}"
     POSTDISPLAY="$remainder"
 
+    _komplete_remove_highlights
     local start=${#BUFFER}
     local end=$(( start + ${#remainder} ))
-    region_highlight=("${region_highlight[@]:#*komplete*}")
-    region_highlight+=("${start} ${end} fg=8 # komplete")
+    region_highlight+=("${start} ${end} fg=8")
     return 0
 }
 
@@ -184,11 +188,13 @@ _komplete_line_pre_redraw() {
 _komplete_accept() {
     if [[ -n "$POSTDISPLAY" && -n "$_komplete_suggestion" ]]; then
         local accepted="$_komplete_suggestion"
+        local orig_len=${#BUFFER}
+        _komplete_kill_async
         _komplete_clear
         BUFFER="$accepted"
         CURSOR=${#BUFFER}
         _komplete_prev_buffer="$BUFFER"
-        zle redisplay
+        region_highlight+=("${orig_len} ${#BUFFER} fg=default")
     else
         _komplete_clear
         zle expand-or-complete
@@ -198,17 +204,23 @@ _komplete_accept() {
 _komplete_accept_word() {
     if [[ -n "$POSTDISPLAY" && -n "$_komplete_suggestion" ]]; then
         local remaining="${_komplete_suggestion#${BUFFER}}"
+        local orig_len=${#BUFFER}
         local next_word
         if [[ "$remaining" == *" "* ]]; then
             next_word="${remaining%% *} "
         else
             next_word="$remaining"
         fi
+
+        _komplete_remove_highlights
+
         BUFFER="${BUFFER}${next_word}"
         CURSOR=${#BUFFER}
         _komplete_prev_buffer="$BUFFER"
 
-        if ! _komplete_display "$_komplete_suggestion"; then
+        if _komplete_display "$_komplete_suggestion"; then
+            region_highlight+=("${orig_len} ${#BUFFER} fg=default")
+        else
             _komplete_clear
         fi
         zle -R
