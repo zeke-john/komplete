@@ -22,25 +22,16 @@ homebrew_casks:
     description: "AI shell assistant - natural language to commands and inline autocomplete"
     binaries:
       - komplete
-    hooks:
-      post:
-        install: |
-          if OS.mac?
-            system_command ""/usr/bin/xattr"", args: [""-dr"", ""com.apple.quarantine"", ""#{staged_path}/komplete""]
-          end
     caveats: |
-      Set your API key to start using komplete:
-
+      Get started:
         komplete config set openrouter_api_key YOUR_KEY
 
-      Optional alias (add to .zshrc):
+      Optional alias, add to .zshrc:
+        alias k=komplete
 
-        eval "$(komplete init alias)"
-
-      Optional inline autocomplete (add to .zshrc):
-
-        eval "$(komplete init zsh)"
+      Optional autocomplete, add to .zshrc:
         komplete config set groq_api_key YOUR_KEY
+      Then run: komplete init zsh
 
 changelog:
   use: git
