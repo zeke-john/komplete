@@ -1,6 +1,6 @@
 # Komplete
 
-A lightweight AI shell assistant that has realtime autocomplete while your typing, and lets you say what you want in plain english and get real shell commands back for anything with the prefix "`k`"
+A lightweight AI shell assistant that converts natural language to shell commands and provides realtime autocomplete as you type. Completely open-source and made with Go & BAML.
 
 So the two features are ->
 
