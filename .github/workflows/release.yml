@@ -25,7 +25,7 @@ jobs:
         run: |
           VERSION="0.0.1-$(git rev-parse --short HEAD)"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          git tag "v$VERSION"
+          git tag -f "v$VERSION"
 
       - uses: goreleaser/goreleaser-action@v6
         with:
