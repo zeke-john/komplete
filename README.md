@@ -1,11 +1,13 @@
 # Komplete
 
-AI shell assistant. Type what you want in plain english, get real shell commands. Also with realtime auto complete when your typing commands.
+A lightweight AI shell assistant that has realtime autocomplete while your typing, and lets you say what you want in plain english and get real shell commands back for anything with the prefix "`k`"
 
-Two features:
+So the two features are ->
 
 - **Natural language to shell commands**: `k count all the .ts are in this folder` generates the command(s), asks for confirmation, and runs them.
 - **Inline realtime autocomplete**: Non-intrusive and instant ghost-text autocomplete suggestions as you type, like copilot for your terminal.
+
+A example below of **komplete** in action!
 
 ## Install
 
