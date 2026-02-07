@@ -80,7 +80,9 @@ k --model openai/gpt-oss-20b list files   # use a different model
 
 ## Inline Autocomplete
 
-Ghost-text suggestions as you type, powered by Groq's fast inference with llama-3.1-8b-instant.
+Ghost-text suggestions as you type, using Groq's fast inference with llama-3.1-8b-instant. Suggestions appear instantly as you type, predicting what you're about to write based on context.
+
+The autocomplete is smart enough to understand your intent and suggest complete commands with proper flags, arguments, and syntax. It's non-intrusive and the subtle ghost text that appears ahead of your cursor doesn't interrupt your flow.
 
 - **Tab** - accept the full suggestion
 - **Shift+Tab** or **Option+F** - accept one word at a time
