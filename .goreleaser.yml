@@ -17,6 +17,7 @@ homebrew_casks:
   - repository:
       owner: zeke-john
       name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
     homepage: "https://github.com/zeke-john/komplete"
     description: "AI shell assistant - natural language to commands and inline autocomplete"
     binaries:
