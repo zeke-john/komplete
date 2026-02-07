@@ -1,12 +1,9 @@
 version: 2
 
 builds:
-  - env:
-      - CGO_ENABLED=0
-    goos:
+  - goos:
       - darwin
     goarch:
-      - amd64
       - arm64
     ldflags:
       - -s -w -X github.com/zeke-john/komplete/cmd.Version={{.Version}}
