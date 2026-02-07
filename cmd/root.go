@@ -13,6 +13,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/spf13/cobra"
 
+	baml "github.com/boundaryml/baml/engine/language_client_go/pkg"
 	"github.com/zeke-john/komplete/baml_client"
 	baml_types "github.com/zeke-john/komplete/baml_client/types"
 	"github.com/zeke-john/komplete/internal/config"
@@ -130,8 +131,9 @@ func runRequest(cmd *cobra.Command, args []string) error {
 	if opts.verbose {
 		os.Setenv("BAML_LOG", "info")
 	}
-	if opts.model != "" {
-		callOpts = append(callOpts, baml_client.WithClient(opts.model))
+	modelOpt := resolveModelOption(opts.model)
+	if modelOpt != nil {
+		callOpts = append(callOpts, modelOpt)
 	}
 
 	plan, err := generatePlanWithRepair(ctx, request, contextInfo, shellHistory, callOpts)
@@ -258,6 +260,43 @@ func loadDotEnv(path string) {
 		}
 		_ = os.Setenv(key, value)
 	}
+}
+
+var bamlClientNames = map[string]bool{
+	"OpenRouter": true,
+	"OpenAI":     true,
+	"Anthropic":  true,
+}
+
+func resolveModelOption(flagValue string) baml_client.CallOptionFunc {
+	model := flagValue
+	if model == "" {
+		path, err := config.ConfigPath()
+		if err != nil {
+			return nil
+		}
+		cfg, err := config.Load(path)
+		if err != nil {
+			return nil
+		}
+		model = cfg["model"]
+	}
+	if model == "" {
+		return nil
+	}
+
+	if bamlClientNames[model] {
+		return baml_client.WithClient(model)
+	}
+
+	registry := baml.NewClientRegistry()
+	registry.AddLlmClient("DynamicClient", "openai-generic", map[string]interface{}{
+		"base_url": "https://openrouter.ai/api/v1",
+		"api_key":  os.Getenv("OPENROUTER_API_KEY"),
+		"model":    model,
+	})
+	registry.SetPrimaryClient("DynamicClient")
+	return baml_client.WithClientRegistry(registry)
 }
 
 func shellQuote(value string) string {

@@ -12,7 +12,7 @@ import (
 
 const (
 	groqEndpoint   = "https://api.groq.com/openai/v1/chat/completions"
-	defaultModel   = "llama-3.1-8b-instant"
+	defaultModel   = "openai/gpt-oss-20b"
 	systemPrompt   = `You are a shell autocomplete engine embedded in a terminal. You will receive the user's current working directory, their shell, recent command history, and their partially typed command.
 
 Your job is to predict and return the SINGLE most likely full command the user is trying to type. Think about:
