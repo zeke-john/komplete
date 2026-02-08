@@ -7,7 +7,7 @@ So the two features are ->
 - **Natural language to shell commands**: `k count all the .ts are in this folder` generates the command(s), asks for confirmation, and runs them.
 - **Inline realtime autocomplete**: Non-intrusive and instant ghost-text autocomplete suggestions as you type, like copilot for your terminal.
 
-A example below of **komplete** in action!
+An example below of **komplete** in action!
 
 
 
